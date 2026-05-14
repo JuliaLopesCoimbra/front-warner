@@ -149,7 +149,7 @@ export function CpfRetornoScreen() {
                   onClick={goNew}
                   className={`w-full rounded-2xl border-2 border-dashed border-neutral-300 bg-white px-5 text-left text-neutral-400 active:bg-neutral-50 min-h-[clamp(44px,8vmin,100px)] ${totemText.bodySm}`}
                 >
-                  + Cadastrar "{trimmed}" como novo
+                  + Cadastrar &quot;{trimmed}&quot; como novo
                 </button>
               </li>
             </ul>
@@ -163,7 +163,7 @@ export function CpfRetornoScreen() {
                 onClick={goNew}
                 className={`w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 text-center font-semibold text-neutral-900 active:bg-neutral-200 min-h-[clamp(52px,10vmin,120px)] ${totemText.body}`}
               >
-                + Cadastrar "{trimmed}" como novo →
+                + Cadastrar &quot;{trimmed}&quot; como novo →
               </button>
             </div>
           )}

@@ -62,8 +62,6 @@ export function RankingView() {
 
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const from = total === 0 ? 0 : offset + 1;
-  const to = total === 0 ? 0 : Math.min(offset + PAGE_SIZE, total);
 
   return (
     <div className="min-h-screen bg-cover bg-center bg-fixed" style={{ backgroundImage: "url('/fundo.JPEG')" }}>

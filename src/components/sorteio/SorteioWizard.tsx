@@ -131,7 +131,6 @@ export function SorteioWizard() {
 
     if (animTickRef.current !== null) clearTimeout(animTickRef.current);
 
-    const itemH = getItemHPx();
     const schedule = buildSchedule();
     scheduleRef.current = schedule;
     tickIdxRef.current = 0;
@@ -210,7 +209,6 @@ export function SorteioWizard() {
     animTickRef.current = setTimeout(runTick, 200);
   };
 
-  const pool = selectedList;
   const truncated = totalRegistered > candidates.length;
 
   const btnBase =
