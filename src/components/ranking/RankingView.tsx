@@ -64,84 +64,90 @@ export function RankingView() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-fixed" style={{ backgroundImage: "url('/fundo.JPEG')" }}>
-    <div className="relative mx-auto flex min-h-screen max-w-4xl flex-col px-[clamp(16px,4vw,56px)] py-[clamp(24px,5vw,72px)] pb-24">
-      <Link
-        href="/historico"
-        className="fixed left-[clamp(12px,2vw,28px)] top-[clamp(12px,2vw,28px)] z-20 rounded-full border border-neutral-300 bg-white px-4 py-2 text-[clamp(12px,1.5vw,20px)] font-semibold text-neutral-600 hover:border-neutral-500 hover:text-neutral-900"
-      >
-        Histórico
-      </Link>
-      <Link
-        href="/sorteio"
-        className="fixed right-[clamp(12px,2vw,28px)] top-[clamp(12px,2vw,28px)] z-20 rounded-full border border-neutral-300 bg-white px-4 py-2 text-[clamp(12px,1.5vw,20px)] font-semibold text-neutral-600 hover:border-neutral-900 hover:text-neutral-900"
-      >
-        Sorteio
-      </Link>
+    <div
+      className="h-screen overflow-hidden bg-cover bg-center bg-fixed"
+      style={{ backgroundImage: "url('/fundo.JPEG')" }}
+    >
+      <div className="relative mx-auto flex h-full max-w-4xl flex-col px-[clamp(16px,3vw,48px)]" style={{ paddingTop: "clamp(48px,6vh,72px)", paddingBottom: "clamp(12px,2vh,28px)" }}>
 
-      {/* Cabeçalho */}
-      <p className="text-center text-[clamp(12px,3vw,38px)] font-bold uppercase tracking-[0.22em] text-neutral-900">
-        Ranking
-      </p>
-      <h1 className="mt-3 text-center text-[clamp(24px,8vw,110px)] font-bold tracking-tight text-neutral-900">
-        Participantes e pontuações
-      </h1>
+        {/* Navegação */}
+        <Link
+          href="/historico"
+          className="fixed left-[clamp(12px,2vw,28px)] top-[clamp(10px,1.5vh,20px)] z-20 rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-[clamp(11px,1.3vw,16px)] font-semibold text-neutral-600 hover:border-neutral-500 hover:text-neutral-900"
+        >
+          Histórico
+        </Link>
+        <Link
+          href="/sorteio"
+          className="fixed right-[clamp(12px,2vw,28px)] top-[clamp(10px,1.5vh,20px)] z-20 rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-[clamp(11px,1.3vw,16px)] font-semibold text-neutral-600 hover:border-neutral-900"
+        >
+          Sorteio
+        </Link>
 
-      {/* Lista */}
-      <div className="mt-[clamp(24px,4vw,56px)] rounded-2xl border border-neutral-200 bg-white shadow-sm">
-        {loading ? (
-          <p className="py-20 text-center text-[clamp(15px,3vw,42px)] text-neutral-400">
-            Carregando…
+        {/* Cabeçalho */}
+        <div className="shrink-0">
+          <p className="text-center text-[clamp(11px,1.6vh,26px)] font-bold uppercase tracking-[0.22em] text-neutral-900">
+            Ranking
           </p>
-        ) : error ? (
-          <div className="flex flex-col items-center gap-6 py-20">
-            <p className="text-center text-[clamp(15px,3vw,42px)] text-red-600">{error}</p>
-            <button
-              type="button"
-              onClick={() => void load()}
-              className="rounded-xl bg-neutral-900 px-[clamp(20px,4vw,56px)] py-[clamp(12px,2.5vw,36px)] text-[clamp(14px,2.8vw,40px)] font-bold text-white"
-            >
-              Tentar de novo
-            </button>
-          </div>
-        ) : !data?.items.length ? (
-          <p className="py-20 text-center text-[clamp(15px,3vw,42px)] text-neutral-400">
-            Nenhum participante cadastrado ainda.
-          </p>
-        ) : (
-          <ul className="divide-y divide-neutral-100">
-            {data.items.map((row) => (
-              <li
-                key={row.id}
-                className="flex items-center justify-between gap-[clamp(12px,2vw,32px)] px-[clamp(16px,4vw,60px)] py-[clamp(14px,4vw,56px)]"
+          <h1 className="mt-1 text-center text-[clamp(16px,3.5vh,60px)] font-bold tracking-tight text-neutral-900">
+            Participantes e pontuações
+          </h1>
+        </div>
+
+        {/* Lista — flex-1 para ocupar o espaço disponível */}
+        <div className="mt-[clamp(10px,1.5vh,20px)] flex-1 min-h-0 rounded-2xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
+          {loading ? (
+            <p className="flex h-full items-center justify-center text-[clamp(13px,1.8vh,22px)] text-neutral-400">
+              Carregando…
+            </p>
+          ) : error ? (
+            <div className="flex h-full flex-col items-center justify-center gap-4">
+              <p className="text-center text-[clamp(13px,1.8vh,22px)] text-red-600">{error}</p>
+              <button
+                type="button"
+                onClick={() => void load()}
+                className="rounded-xl bg-neutral-900 px-6 py-2.5 text-[clamp(13px,1.6vh,20px)] font-bold text-white"
               >
-                <div className="flex min-w-0 items-center gap-[clamp(12px,3vw,44px)]">
-                  <span className="flex h-[clamp(38px,9vw,122px)] w-[clamp(38px,9vw,122px)] shrink-0 items-center justify-center rounded-full border-[3px] border-neutral-900 bg-white text-[clamp(14px,3.5vw,48px)] font-bold text-neutral-900">
-                    {row.rank}
+                Tentar de novo
+              </button>
+            </div>
+          ) : !data?.items.length ? (
+            <p className="flex h-full items-center justify-center text-[clamp(13px,1.8vh,22px)] text-neutral-400">
+              Nenhum participante cadastrado ainda.
+            </p>
+          ) : (
+            <ul className="flex h-full flex-col divide-y divide-neutral-100">
+              {data.items.map((row) => (
+                <li
+                  key={row.id}
+                  className="flex flex-1 items-center justify-between gap-[clamp(8px,1.5vw,24px)] px-[clamp(12px,3vw,40px)]"
+                >
+                  <div className="flex min-w-0 items-center gap-[clamp(8px,2vw,28px)]">
+                    <span className="flex h-[clamp(28px,4vh,72px)] w-[clamp(28px,4vh,72px)] shrink-0 items-center justify-center rounded-full border-2 border-neutral-900 bg-white text-[clamp(12px,2vh,34px)] font-bold text-neutral-900">
+                      {row.rank}
+                    </span>
+                    <span className="truncate text-[clamp(14px,2.8vh,48px)] font-semibold text-neutral-900">
+                      {row.nickname}
+                    </span>
+                  </div>
+                  <span className="shrink-0 tabular-nums text-[clamp(15px,3.2vh,54px)] font-bold text-neutral-800">
+                    {row.score}{" "}
+                    <span className="text-[clamp(11px,1.6vh,26px)] font-normal text-neutral-400">pts</span>
                   </span>
-                  <span className="truncate text-[clamp(16px,5vw,70px)] font-semibold text-neutral-900">
-                    {row.nickname}
-                  </span>
-                </div>
-                <span className="shrink-0 tabular-nums text-[clamp(18px,5.5vw,76px)] font-bold text-neutral-800">
-                  {row.score}{" "}
-                  <span className="text-[clamp(12px,2.2vw,30px)] font-normal text-neutral-400">pts</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
-      {/* Paginação */}
-      {!loading && !error && total > 0 ? (
-        <div className="mt-[clamp(20px,3.5vw,48px)] flex flex-col items-center gap-5">
-          <div className="flex gap-3">
+        {/* Paginação */}
+        {!loading && !error && total > 0 && (
+          <div className="mt-[clamp(8px,1.2vh,16px)] shrink-0 flex justify-center gap-3">
             <button
               type="button"
               disabled={page <= 0}
               onClick={() => setPage((p) => Math.max(0, p - 1))}
-              className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-500 disabled:cursor-not-allowed disabled:opacity-35 hover:text-neutral-800"
+              className="rounded-lg border border-neutral-300 bg-white px-4 py-1.5 text-[clamp(11px,1.3vh,16px)] font-medium text-neutral-500 disabled:cursor-not-allowed disabled:opacity-35 hover:text-neutral-800"
             >
               ← Anterior
             </button>
@@ -149,24 +155,23 @@ export function RankingView() {
               type="button"
               disabled={page >= totalPages - 1}
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-              className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-500 disabled:cursor-not-allowed disabled:opacity-35 hover:text-neutral-800"
+              className="rounded-lg border border-neutral-300 bg-white px-4 py-1.5 text-[clamp(11px,1.3vh,16px)] font-medium text-neutral-500 disabled:cursor-not-allowed disabled:opacity-35 hover:text-neutral-800"
             >
               Próximo →
             </button>
           </div>
-        </div>
-      ) : null}
+        )}
 
-      {/* Links */}
-      <div className="mt-[clamp(28px,5vw,64px)] flex flex-col gap-[clamp(10px,1.8vw,24px)] text-center">
-        <Link
-          href="/"
-          className="text-[clamp(14px,2.2vw,32px)] text-neutral-400 underline-offset-4 hover:text-neutral-700 hover:underline"
-        >
-          ← Voltar ao início
-        </Link>
+        {/* Rodapé */}
+        <div className="mt-[clamp(6px,1vh,14px)] shrink-0 text-center">
+          <Link
+            href="/"
+            className="text-[clamp(11px,1.3vh,16px)] text-neutral-400 underline-offset-4 hover:text-neutral-700 hover:underline"
+          >
+            ← Voltar ao início
+          </Link>
+        </div>
       </div>
-    </div>
     </div>
   );
 }
