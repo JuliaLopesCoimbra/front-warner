@@ -90,8 +90,6 @@ export function CpfRetornoScreen() {
 
   const trimmed = name.trim();
   const hasInput = trimmed.length >= 2;
-  // Keyboard hidden when results are visible so all 10 items fit on screen
-  const showKeyboard = results.length === 0;
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col px-[4%] pb-[2%] pt-[3%]">
@@ -186,16 +184,14 @@ export function CpfRetornoScreen() {
         )}
       </div>
 
-      {/* Teclado virtual — totem, oculto quando há resultados */}
-      {showKeyboard && (
-        <div className="mt-[2%] shrink-0 hidden md:block">
-          <OnScreenAlphaPad
-            onKey={appendChar}
-            onBackspace={back}
-            onSpace={() => appendChar(" ")}
-          />
-        </div>
-      )}
+      {/* Teclado virtual — sempre visível no totem (md+), oculto no mobile */}
+      <div className="mt-[2%] shrink-0 hidden md:block">
+        <OnScreenAlphaPad
+          onKey={appendChar}
+          onBackspace={back}
+          onSpace={() => appendChar(" ")}
+        />
+      </div>
 
       <div className="mt-[2%] shrink-0">
         <Link
