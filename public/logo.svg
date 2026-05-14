@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" fill="none">
+  <defs>
+    <linearGradient id="a" x1="0" y1="0" x2="720" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF0080"/>
+      <stop offset="1" stop-color="#800040"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="720" rx="48" fill="#141414"/>
+  <circle cx="360" cy="300" r="120" fill="url(#a)" opacity="0.95"/>
+  <text x="360" y="520" text-anchor="middle" fill="#e8e8e8" font-family="system-ui,Segoe UI,sans-serif" font-size="42" font-weight="600">LOGO</text>
+  <text x="360" y="575" text-anchor="middle" fill="#666" font-family="system-ui,Segoe UI,sans-serif" font-size="22">Cliente</text>
+</svg>
