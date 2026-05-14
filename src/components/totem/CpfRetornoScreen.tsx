@@ -26,7 +26,11 @@ export function CpfRetornoScreen() {
     setName((prev) => prev.slice(0, -1));
   }, []);
 
-  // Busca com debounce
+  const clearName = useCallback(() => {
+    setName("");
+    setResults([]);
+  }, []);
+
   useEffect(() => {
     const trimmed = name.trim();
     if (trimmed.length < 2) {
@@ -38,7 +42,7 @@ export function CpfRetornoScreen() {
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(
-          `${getApiBaseUrl()}/participants/search?q=${encodeURIComponent(trimmed)}&limit=6`,
+          `${getApiBaseUrl()}/participants/search?q=${encodeURIComponent(trimmed)}&limit=10`,
           { cache: "no-store" }
         );
         const data = (await res.json()) as { items?: SearchResult[] };
@@ -66,7 +70,6 @@ export function CpfRetornoScreen() {
     router.push(`/totem/cadastro?nome=${encodeURIComponent(name.trim())}`);
   }, [name, router]);
 
-  // Teclado físico
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (submitting) return;
@@ -87,30 +90,41 @@ export function CpfRetornoScreen() {
 
   const trimmed = name.trim();
   const hasInput = trimmed.length >= 2;
+  // Keyboard hidden when results are visible so all 10 items fit on screen
+  const showKeyboard = results.length === 0;
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col px-[4%] pb-[3%] pt-[4%]">
-      <p className={`text-center text-neutral-900 ${totemText.kicker}`}>
+    <div className="flex h-full min-h-0 w-full flex-col px-[4%] pb-[2%] pt-[3%]">
+      {/* Header */}
+      <p className={`shrink-0 text-center text-neutral-900 ${totemText.kicker}`}>
         03 · Retorno
       </p>
-      <h1 className={`mt-[2%] text-center text-neutral-900 ${totemText.title}`}>
+      <h1 className={`mt-[1%] shrink-0 text-center text-neutral-900 ${totemText.title}`}>
         Quem é você?
       </h1>
 
       {/* Display — totem */}
-      <div className="mt-[2.5%] shrink-0 hidden md:block">
-        <div className={`rounded-2xl border-2 px-5 py-4 transition-colors sm:px-6 sm:py-5 ${
+      <div className="mt-[2%] shrink-0 hidden md:block">
+        <div className={`flex items-center justify-between rounded-2xl border-2 px-5 py-[clamp(6px,1.2vmin,14px)] transition-colors ${
           hasInput ? "border-neutral-900 bg-neutral-100" : "border-neutral-200 bg-neutral-50"
         }`}>
-          <p className={`text-neutral-400 ${totemText.caption}`}>Nome</p>
-          <p className="mt-1 truncate text-[clamp(22px,4.6vmin,56px)] font-bold text-neutral-900">
+          <p className="truncate text-[clamp(18px,4vmin,48px)] font-bold text-neutral-900">
             {name || <span className="text-neutral-300">—</span>}
           </p>
+          {hasInput && (
+            <button
+              type="button"
+              onClick={clearName}
+              className="ml-3 shrink-0 rounded-full px-2 text-[clamp(13px,2.5vmin,28px)] font-bold text-neutral-400 active:text-neutral-700"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
       {/* Input nativo — mobile */}
-      <div className="mt-[3%] shrink-0 md:hidden">
+      <div className="mt-[2%] shrink-0 md:hidden">
         <input
           type="text"
           value={name}
@@ -118,74 +132,72 @@ export function CpfRetornoScreen() {
           placeholder="Digite seu nome"
           autoFocus
           autoComplete="off"
-          className="w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 py-4 text-[clamp(18px,4vmin,32px)] font-bold text-neutral-900 outline-none placeholder:text-neutral-300 focus:border-neutral-700"
+          className="w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 py-3 text-[clamp(18px,4vmin,32px)] font-bold text-neutral-900 outline-none placeholder:text-neutral-300"
         />
       </div>
 
-      {/* Lista de resultados */}
-      {hasInput ? (
-        <div className="mt-[2%] overflow-y-auto shrink-0 max-h-[clamp(150px,26vmin,300px)]">
-          {searching ? (
-            <p className={`py-3 text-center text-neutral-400 ${totemText.bodySm}`}>
-              Buscando…
-            </p>
-          ) : results.length > 0 ? (
-            <ul className="flex flex-col gap-[clamp(6px,1.2vmin,14px)]">
-              {results.map((r) => (
-                <li key={r.id}>
-                  <button
-                    type="button"
-                    disabled={submitting}
-                    onClick={() => selectParticipant(r)}
-                    className={`w-full rounded-2xl border-2 border-neutral-200 bg-white px-5 text-left font-semibold text-neutral-900 active:border-neutral-400 active:bg-neutral-100 disabled:opacity-50 min-h-[clamp(52px,10vmin,120px)] ${totemText.body}`}
-                  >
-                    {r.nickname}
-                  </button>
-                </li>
-              ))}
-              <li>
+      {/* Resultados — flex-1 ocupa o espaço restante entre display e teclado/botão */}
+      <div className="mt-[2%] flex-1 min-h-0 overflow-y-auto">
+        {searching ? (
+          <p className={`py-3 text-center text-neutral-400 ${totemText.bodySm}`}>
+            Buscando…
+          </p>
+        ) : results.length > 0 ? (
+          <ul className="flex flex-col gap-[clamp(3px,0.6vmin,7px)]">
+            {results.map((r) => (
+              <li key={r.id}>
                 <button
                   type="button"
-                  onClick={goNew}
-                  className={`w-full rounded-2xl border-2 border-dashed border-neutral-300 bg-white px-5 text-left text-neutral-400 active:bg-neutral-50 min-h-[clamp(44px,8vmin,100px)] ${totemText.bodySm}`}
+                  disabled={submitting}
+                  onClick={() => selectParticipant(r)}
+                  className={`w-full rounded-2xl border-2 border-neutral-200 bg-white px-5 text-left font-semibold text-neutral-900 active:border-neutral-400 active:bg-neutral-100 disabled:opacity-50 min-h-[clamp(36px,5vmin,60px)] ${totemText.body}`}
                 >
-                  + Cadastrar &quot;{trimmed}&quot; como novo
+                  {r.nickname}
                 </button>
               </li>
-            </ul>
-          ) : (
-            <div className="flex flex-col gap-[clamp(6px,1.2vmin,14px)]">
-              <p className={`py-1 text-center text-neutral-400 ${totemText.bodySm}`}>
-                Nenhum cadastro encontrado
-              </p>
+            ))}
+            <li>
               <button
                 type="button"
                 onClick={goNew}
-                className={`w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 text-center font-semibold text-neutral-900 active:bg-neutral-200 min-h-[clamp(52px,10vmin,120px)] ${totemText.body}`}
+                className={`w-full rounded-2xl border-2 border-dashed border-neutral-300 bg-white px-5 text-left text-neutral-400 active:bg-neutral-50 min-h-[clamp(30px,4vmin,48px)] ${totemText.bodySm}`}
               >
-                + Cadastrar &quot;{trimmed}&quot; como novo →
+                + Cadastrar &quot;{trimmed}&quot; como novo
               </button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="mt-[2%] shrink-0">
+            </li>
+          </ul>
+        ) : hasInput ? (
+          <div className="flex flex-col gap-[clamp(6px,1.2vmin,14px)]">
+            <p className={`py-1 text-center text-neutral-400 ${totemText.bodySm}`}>
+              Nenhum cadastro encontrado
+            </p>
+            <button
+              type="button"
+              onClick={goNew}
+              className={`w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 text-center font-semibold text-neutral-900 active:bg-neutral-200 min-h-[clamp(52px,9vmin,110px)] ${totemText.body}`}
+            >
+              + Cadastrar &quot;{trimmed}&quot; como novo →
+            </button>
+          </div>
+        ) : (
           <p className={`text-center text-neutral-300 ${totemText.bodySm}`}>
             Comece a digitar para buscar
           </p>
+        )}
+      </div>
+
+      {/* Teclado virtual — totem, oculto quando há resultados */}
+      {showKeyboard && (
+        <div className="mt-[2%] shrink-0 hidden md:block">
+          <OnScreenAlphaPad
+            onKey={appendChar}
+            onBackspace={back}
+            onSpace={() => appendChar(" ")}
+          />
         </div>
       )}
 
-      {/* Teclado virtual — totem */}
-      <div className="mt-auto hidden min-h-0 shrink-0 md:block">
-        <OnScreenAlphaPad
-          onKey={appendChar}
-          onBackspace={back}
-          onSpace={() => appendChar(" ")}
-        />
-      </div>
-
-      <div className="mt-3 flex shrink-0 flex-col gap-3">
+      <div className="mt-[2%] shrink-0">
         <Link
           href="/totem/fichas"
           className={`text-neutral-600 active:bg-neutral-100 ${totemTouch.btnGhost}`}
