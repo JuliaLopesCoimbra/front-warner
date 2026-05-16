@@ -92,114 +92,124 @@ export function CpfRetornoScreen() {
   const hasInput = trimmed.length >= 2;
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col px-[4%] pb-[2%] pt-[3%]">
-      {/* Header */}
-      <p className={`shrink-0 text-center text-neutral-900 ${totemText.kicker}`}>
-        03 · Retorno
-      </p>
-      <h1 className={`mt-[1%] shrink-0 text-center text-neutral-900 ${totemText.title}`}>
-        Quem é você?
-      </h1>
+    <div className="flex h-full min-h-0 w-full flex-col landscape:flex-row">
+      {/* LEFT: header + display + results */}
+      <div className="flex min-h-0 flex-1 flex-col px-[4%] pb-[2%] pt-[3%] landscape:w-[55%]">
+        {/* Header */}
+        <p className={`shrink-0 text-center text-neutral-900 ${totemText.kicker}`}>
+          03 · Retorno
+        </p>
+        <h1 className={`mt-[1%] shrink-0 text-center text-neutral-900 ${totemText.title}`}>
+          Quem é você?
+        </h1>
 
-      {/* Display — totem */}
-      <div className="mt-[2%] shrink-0 hidden md:block">
-        <div className={`flex items-center justify-between rounded-2xl border-2 px-5 py-[clamp(6px,1.2vmin,14px)] transition-colors ${
-          hasInput ? "border-neutral-900 bg-neutral-100" : "border-neutral-200 bg-neutral-50"
-        }`}>
-          <p className="truncate text-[clamp(18px,4vmin,48px)] font-bold text-neutral-900">
-            {name || <span className="text-neutral-300">—</span>}
-          </p>
-          {hasInput && (
-            <button
-              type="button"
-              onClick={clearName}
-              className="ml-3 shrink-0 rounded-full px-2 text-[clamp(13px,2.5vmin,28px)] font-bold text-neutral-400 active:text-neutral-700"
-            >
-              ✕
-            </button>
-          )}
+        {/* Display — totem */}
+        <div className="mt-[2%] shrink-0 hidden landscape:block">
+          <div className={`flex items-center justify-between rounded-2xl border-2 px-5 py-[clamp(6px,1.2vmin,14px)] transition-colors ${
+            hasInput ? "border-neutral-900 bg-neutral-100" : "border-neutral-200 bg-neutral-50"
+          }`}>
+            <p className="truncate text-[clamp(18px,4vmin,48px)] font-bold text-neutral-900">
+              {name || <span className="text-neutral-300">—</span>}
+            </p>
+            {hasInput && (
+              <button
+                type="button"
+                onClick={clearName}
+                className="ml-3 shrink-0 rounded-full px-2 text-[clamp(13px,2.5vmin,28px)] font-bold text-neutral-400 active:text-neutral-700"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Input nativo — mobile */}
-      <div className="mt-[2%] shrink-0 md:hidden">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value.slice(0, 60))}
-          placeholder="Digite seu nome"
-          autoFocus
-          autoComplete="off"
-          className="w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 py-3 text-[clamp(18px,4vmin,32px)] font-bold text-neutral-900 outline-none placeholder:text-neutral-300"
-        />
-      </div>
+        {/* Input nativo — mobile */}
+        <div className="mt-[2%] shrink-0 landscape:hidden">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value.slice(0, 60))}
+            placeholder="Digite seu nome"
+            autoFocus
+            autoComplete="off"
+            className="w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 py-3 text-[clamp(18px,4vmin,32px)] font-bold text-neutral-900 outline-none placeholder:text-neutral-300"
+          />
+        </div>
 
-      {/* Resultados — flex-1 ocupa o espaço restante entre display e teclado/botão */}
-      <div className="mt-[2%] flex-1 min-h-0 overflow-y-auto">
-        {searching ? (
-          <p className={`py-3 text-center text-neutral-400 ${totemText.bodySm}`}>
-            Buscando…
-          </p>
-        ) : results.length > 0 ? (
-          <ul className="flex flex-col gap-[clamp(3px,0.6vmin,7px)]">
-            {results.map((r) => (
-              <li key={r.id}>
+        {/* Results */}
+        <div className="mt-[2%] flex-1 min-h-0 overflow-y-auto">
+          {searching ? (
+            <p className={`py-3 text-center text-neutral-400 ${totemText.bodySm}`}>
+              Buscando…
+            </p>
+          ) : results.length > 0 ? (
+            <ul className="flex flex-col gap-[clamp(3px,0.6vmin,7px)]">
+              {results.map((r) => (
+                <li key={r.id}>
+                  <button
+                    type="button"
+                    disabled={submitting}
+                    onClick={() => selectParticipant(r)}
+                    className={`w-full rounded-2xl border-2 border-neutral-200 bg-white px-5 text-left font-semibold text-neutral-900 active:border-neutral-400 active:bg-neutral-100 disabled:opacity-50 min-h-[clamp(36px,5vmin,60px)] ${totemText.body}`}
+                  >
+                    {r.nickname}
+                  </button>
+                </li>
+              ))}
+              <li>
                 <button
                   type="button"
-                  disabled={submitting}
-                  onClick={() => selectParticipant(r)}
-                  className={`w-full rounded-2xl border-2 border-neutral-200 bg-white px-5 text-left font-semibold text-neutral-900 active:border-neutral-400 active:bg-neutral-100 disabled:opacity-50 min-h-[clamp(36px,5vmin,60px)] ${totemText.body}`}
+                  onClick={goNew}
+                  className={`w-full rounded-2xl border-2 border-dashed border-neutral-300 bg-white px-5 text-left text-neutral-400 active:bg-neutral-50 min-h-[clamp(30px,4vmin,48px)] ${totemText.bodySm}`}
                 >
-                  {r.nickname}
+                  + Cadastrar &quot;{trimmed}&quot; como novo
                 </button>
               </li>
-            ))}
-            <li>
+            </ul>
+          ) : hasInput ? (
+            <div className="flex flex-col gap-[clamp(6px,1.2vmin,14px)]">
+              <p className={`py-1 text-center text-neutral-400 ${totemText.bodySm}`}>
+                Nenhum cadastro encontrado
+              </p>
               <button
                 type="button"
                 onClick={goNew}
-                className={`w-full rounded-2xl border-2 border-dashed border-neutral-300 bg-white px-5 text-left text-neutral-400 active:bg-neutral-50 min-h-[clamp(30px,4vmin,48px)] ${totemText.bodySm}`}
+                className={`w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 text-center font-semibold text-neutral-900 active:bg-neutral-200 min-h-[clamp(52px,9vmin,110px)] ${totemText.body}`}
               >
-                + Cadastrar &quot;{trimmed}&quot; como novo
+                + Cadastrar &quot;{trimmed}&quot; como novo →
               </button>
-            </li>
-          </ul>
-        ) : hasInput ? (
-          <div className="flex flex-col gap-[clamp(6px,1.2vmin,14px)]">
-            <p className={`py-1 text-center text-neutral-400 ${totemText.bodySm}`}>
-              Nenhum cadastro encontrado
-            </p>
-            <button
-              type="button"
-              onClick={goNew}
-              className={`w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 text-center font-semibold text-neutral-900 active:bg-neutral-200 min-h-[clamp(52px,9vmin,110px)] ${totemText.body}`}
-            >
-              + Cadastrar &quot;{trimmed}&quot; como novo →
-            </button>
-          </div>
-        ) : (
-          <p className={`text-center text-neutral-300 ${totemText.bodySm}`}>
-            Comece a digitar para buscar
-          </p>
-        )}
+            </div>
+          ) : null}
+        </div>
+
+        {/* Back button — mobile only */}
+        <div className="mt-[2%] shrink-0 landscape:hidden">
+          <Link
+            href="/totem/fichas"
+            className={`text-neutral-600 active:bg-neutral-100 ${totemTouch.btnGhost}`}
+          >
+            ← Voltar
+          </Link>
+        </div>
       </div>
 
-      {/* Teclado virtual — sempre visível no totem (md+), oculto no mobile */}
-      <div className="mt-[2%] shrink-0 hidden md:block">
-        <OnScreenAlphaPad
-          onKey={appendChar}
-          onBackspace={back}
-          onSpace={() => appendChar(" ")}
-        />
-      </div>
-
-      <div className="mt-[2%] shrink-0">
-        <Link
-          href="/totem/fichas"
-          className={`text-neutral-600 active:bg-neutral-100 ${totemTouch.btnGhost}`}
-        >
-          ← Voltar
-        </Link>
+      {/* RIGHT: keyboard + back — totem only */}
+      <div className="hidden landscape:flex landscape:w-[45%] landscape:flex-col landscape:px-[4%] landscape:pb-[3%] landscape:pt-[3%]">
+        <div className="min-h-0 flex-1">
+          <OnScreenAlphaPad
+            onKey={appendChar}
+            onBackspace={back}
+            onSpace={() => appendChar(" ")}
+          />
+        </div>
+        <div className="mt-[2%] shrink-0">
+          <Link
+            href="/totem/fichas"
+            className={`text-neutral-600 active:bg-neutral-100 ${totemTouch.btnGhost}`}
+          >
+            ← Voltar
+          </Link>
+        </div>
       </div>
     </div>
   );

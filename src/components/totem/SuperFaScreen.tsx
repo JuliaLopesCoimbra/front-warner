@@ -42,6 +42,7 @@ export function SuperFaScreen({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<Outcome>("idle");
+  const [selected, setSelected] = useState<"A" | "B" | "C" | "D" | null>(null);
   const [picked, setPicked] = useState<"A" | "B" | "C" | "D" | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(QUIZ_SECONDS);
@@ -58,6 +59,7 @@ export function SuperFaScreen({
     clearTick();
     setQ(null);
     setOutcome("idle");
+    setSelected(null);
     setPicked(null);
     setSubmitting(false);
     setSecondsLeft(QUIZ_SECONDS);
@@ -93,6 +95,7 @@ export function SuperFaScreen({
     setLoading(true);
     setError(null);
     setOutcome("idle");
+    setSelected(null);
     setPicked(null);
     setSecondsLeft(QUIZ_SECONDS);
     setView("question_loading");
@@ -212,11 +215,13 @@ export function SuperFaScreen({
   );
 
   const optionClass = (key: "A" | "B" | "C" | "D", base: string) => {
-    if (outcome === "idle") return base;
-    if (outcome === "correct" && picked === key) {
-      return `${base} !border-emerald-500 !bg-emerald-50 text-emerald-800`;
+    if (outcome !== "idle") {
+      if (outcome === "correct" && picked === key)
+        return `${base} !border-emerald-500 !bg-emerald-50 text-emerald-800`;
+      return `${base} opacity-40`;
     }
-    return `${base} opacity-40`;
+    if (selected === key) return `${base} !border-neutral-900 !bg-neutral-100`;
+    return base;
   };
 
   const answered = outcome !== "idle";
@@ -229,26 +234,27 @@ export function SuperFaScreen({
   const countdownLabel = view === "cd3" ? "3" : view === "cd2" ? "2" : "1";
   const showQuestionUi = view === "question" || view === "question_loading";
 
-  return (
-    <div className="relative flex h-full min-h-0 w-full flex-col px-[4%] pb-[4%] pt-[4%]">
-      {view !== "intro" ? (
-        <p className={`text-center text-neutral-900 ${totemText.kicker}`}>
-          {displayTitle}
-        </p>
-      ) : null}
-
-      {view === "intro" ? (
+  /* Intro view */
+  if (view === "intro") {
+    return (
+      <div className="relative flex h-full min-h-0 w-full items-center justify-center px-[4%] pb-[4%] pt-[4%]">
         <button
           type="button"
           onClick={() => setView("cd3")}
-          className="flex min-h-0 flex-1 w-full items-center justify-center"
+          className="flex h-full w-full items-center justify-center"
         >
-          <p className={`mt-[20%] text-center font-bold uppercase tracking-[0.16em] text-neutral-600 ${totemText.title}`}>
+          <p className={`text-center font-bold uppercase tracking-[0.16em] text-neutral-600 ${totemText.title}`}>
             Toque para iniciar o Super Quiz
           </p>
         </button>
-      ) : null}
+      </div>
+    );
+  }
 
+  /* Countdown overlay + question ui (or loading/error) */
+  return (
+    <div className="relative flex h-full min-h-0 w-full flex-col">
+      {/* Countdown overlay */}
       {showCountdown ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-neutral-900/90">
           <span className="text-[clamp(100px,34vmin,380px)] font-black tabular-nums text-white">
@@ -259,115 +265,147 @@ export function SuperFaScreen({
 
       {showQuestionUi ? (
         <>
+          {/* Loading or error-no-q: full-width centered */}
           {loading || view === "question_loading" ? (
-            <p className={`mt-[12%] text-center text-neutral-400 ${totemText.loading}`}>
-              Carregando pergunta…
-            </p>
-          ) : error && !q ? (
-            <div className="mt-[6%] flex flex-1 flex-col items-center gap-8">
-              <p className={`max-w-[95%] text-center text-red-600 ${totemText.error}`}>
-                {error}
+            <div className="flex flex-1 flex-col items-center justify-center px-[4%]">
+              <p className={`text-center text-neutral-900 ${totemText.kicker}`}>
+                {displayTitle}
               </p>
-              <button
-                type="button"
-                onClick={() => void loadQuestion()}
-                className={`bg-neutral-900 text-white ${totemTouch.btnRetry}`}
-              >
-                Tentar de novo
-              </button>
-              <button
-                type="button"
-                onClick={goIntro}
-                className={`font-semibold text-neutral-500 underline-offset-4 hover:text-neutral-700 hover:underline ${totemText.body}`}
-              >
-                Voltar ao início
-              </button>
+              <p className={`mt-[12%] text-center text-neutral-400 ${totemText.loading}`}>
+                Carregando pergunta…
+              </p>
             </div>
-          ) : q ? (
-            <>
-              {enableQuestionTimer ? (
-                <div className="mt-[2%] flex items-center justify-between gap-4 px-1">
-                  <p className={`text-neutral-400 ${totemText.caption}`}>
-                    Tempo
-                  </p>
-                  <div
-                    className={`${totemTouch.timerCircle} ${totemText.timerNum} ${
-                      answered
-                        ? "border-neutral-300 text-neutral-400"
-                        : timerUrgent
-                          ? "border-red-500 bg-red-50 text-red-600"
-                          : "border-neutral-900 bg-neutral-100 text-neutral-900"
-                    }`}
-                    aria-live="polite"
-                  >
-                    {answered ? "—" : secondsLeft}
-                  </div>
-                </div>
-              ) : null}
-
-              <div
-                className={`shrink-0 ${totemTouch.promptBox} ${enableQuestionTimer ? "mt-[2%]" : "mt-[6%]"}`}
-              >
-                <p className={`text-neutral-900 ${totemText.prompt}`}>
-                  {q.prompt}
-                </p>
-              </div>
-
-              <div className="mt-4 flex min-h-0 flex-1 flex-col justify-center gap-3">
-                {q.options.map((o) => (
-                  <button
-                    key={o.letter}
-                    type="button"
-                    disabled={answered || submitting}
-                    onClick={() => void submitChoice(o.letter)}
-                    className={optionClass(
-                      o.letter,
-                      `${totemTouch.optionRow} active:border-neutral-400 enabled:active:bg-neutral-100`
-                    )}
-                  >
-                    <span className={`${totemTouch.optionBadge} bg-neutral-200 ${totemText.optionLetter} text-neutral-900`}>
-                      {o.letter}
-                    </span>
-                    <span className={`text-neutral-800 ${totemText.optionText}`}>
-                      {o.text}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {outcome === "correct" ? (
-                <p className={`mt-3 text-center text-emerald-600 ${totemText.outcome}`}>
-                  Você acertou!
-                </p>
-              ) : null}
-              {outcome === "wrong" ? (
-                <p className={`mt-3 text-center text-red-600 ${totemText.outcome}`}>
-                  Você errou
-                </p>
-              ) : null}
-              {outcome === "timeout" ? (
-                <p className={`mt-3 text-center text-red-600 ${totemText.outcome}`}>
-                  Você não respondeu a tempo
-                </p>
-              ) : null}
-
-              {error && q ? (
-                <p className={`mt-2 text-center text-amber-600 ${totemText.warn}`}>
+          ) : error && !q ? (
+            <div className="flex flex-1 flex-col items-center justify-center px-[4%]">
+              <p className={`text-center text-neutral-900 ${totemText.kicker}`}>
+                {displayTitle}
+              </p>
+              <div className="mt-[6%] flex flex-col items-center gap-8">
+                <p className={`max-w-[95%] text-center text-red-600 ${totemText.error}`}>
                   {error}
                 </p>
-              ) : null}
-            </>
-          ) : null}
+                <button
+                  type="button"
+                  onClick={() => void loadQuestion()}
+                  className={`bg-neutral-900 text-white ${totemTouch.btnRetry}`}
+                >
+                  Tentar de novo
+                </button>
+                <button
+                  type="button"
+                  onClick={goIntro}
+                  className={`font-semibold text-neutral-500 underline-offset-4 hover:text-neutral-700 hover:underline ${totemText.body}`}
+                >
+                  Voltar ao início
+                </button>
+              </div>
+            </div>
+          ) : q ? (
+            /* 2-column layout for question */
+            <div className="flex min-h-0 flex-1 flex-col landscape:flex-row">
+              {/* LEFT: title + timer + prompt */}
+              <div className="flex flex-col px-[4%] pb-[3%] pt-[4%] landscape:w-[48%]">
+                <p className={`shrink-0 text-center text-neutral-900 ${totemText.kicker}`}>
+                  {displayTitle}
+                </p>
 
-          {q && answered ? (
-            <div className="mt-auto flex shrink-0 flex-col gap-3 pt-4">
-              <button
-                type="button"
-                onClick={goIntro}
-                className={`bg-neutral-900 text-white active:bg-neutral-700 ${totemTouch.btnPrimary}`}
-              >
-                Reiniciar
-              </button>
+                {enableQuestionTimer ? (
+                  <div className="mt-[2%] flex shrink-0 items-center justify-between gap-4 px-1">
+                    <p className={`text-neutral-400 ${totemText.caption}`}>
+                      Tempo
+                    </p>
+                    <div
+                      className={`${totemTouch.timerCircle} ${totemText.timerNum} ${
+                        answered
+                          ? "border-neutral-300 text-neutral-400"
+                          : timerUrgent
+                            ? "border-red-500 bg-red-50 text-red-600"
+                            : "border-neutral-900 bg-neutral-100 text-neutral-900"
+                      }`}
+                      aria-live="polite"
+                    >
+                      {answered ? "—" : secondsLeft}
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="flex min-h-0 flex-1 flex-col justify-center">
+                  <div className={`${totemTouch.promptBox} ${enableQuestionTimer ? "mt-[2%]" : "mt-[6%]"}`}>
+                    <p className={`text-neutral-900 ${totemText.prompt}`}>
+                      {q.prompt}
+                    </p>
+                  </div>
+                  {/* resultado abaixo da pergunta — mesmo espaço que seria vazio, sem mover as opções */}
+                  {outcome === "correct" ? (
+                    <p className={`mt-3 text-center text-emerald-600 ${totemText.outcome}`}>
+                      Você acertou!
+                    </p>
+                  ) : outcome === "wrong" ? (
+                    <p className={`mt-3 text-center text-red-600 ${totemText.outcome}`}>
+                      Você errou
+                    </p>
+                  ) : outcome === "timeout" ? (
+                    <p className={`mt-3 text-center text-red-600 ${totemText.outcome}`}>
+                      Você não respondeu a tempo
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+
+              {/* divider — totem only */}
+              <div className="hidden landscape:block landscape:w-px landscape:self-stretch landscape:bg-neutral-200" />
+
+              {/* RIGHT: options + enviar/reiniciar */}
+              <div className="flex min-h-0 flex-1 flex-col gap-3 px-[4%] pb-5 pt-5 landscape:w-[52%]">
+                <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+                  {q.options.map((o) => (
+                    <button
+                      key={o.letter}
+                      type="button"
+                      disabled={answered || submitting}
+                      onClick={() => setSelected(o.letter)}
+                      className={optionClass(
+                        o.letter,
+                        `${totemTouch.optionRow} active:border-neutral-400 enabled:active:bg-neutral-100`
+                      )}
+                    >
+                      <span className={`${totemTouch.optionBadge} bg-neutral-200 ${totemText.optionLetter} text-neutral-900`}>
+                        {o.letter}
+                      </span>
+                      <span className={`text-neutral-800 ${totemText.optionText}`}>
+                        {o.text}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {error && q ? (
+                  <p className={`text-center text-amber-600 ${totemText.warn}`}>
+                    {error}
+                  </p>
+                ) : null}
+
+                <div className="flex shrink-0 flex-col gap-3">
+                  {!answered ? (
+                    <button
+                      type="button"
+                      disabled={!selected || submitting}
+                      onClick={() => { if (selected) void submitChoice(selected); }}
+                      className={`bg-neutral-900 text-white disabled:opacity-40 ${totemTouch.btnPrimary}`}
+                    >
+                      {submitting ? "Enviando…" : "Enviar →"}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={goIntro}
+                      className={`bg-neutral-900 text-white active:bg-neutral-700 ${totemTouch.btnPrimary}`}
+                    >
+                      Reiniciar
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           ) : null}
         </>

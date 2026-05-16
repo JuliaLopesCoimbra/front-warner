@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant landscape (@media (orientation: landscape));
+
 :root {
   --background: #ffffff;
   --foreground: #111111;
@@ -12,4 +14,26 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Totem canvas: portrait → 9:16, landscape → 16:9, phones → full screen */
+.totem-canvas {
+  width: min(100vw, calc(100dvh * 9 / 16));
+  height: auto;
+  aspect-ratio: 9 / 16;
+}
+@media (orientation: landscape) {
+  .totem-canvas {
+    width: min(1920px, min(100vw, calc(100dvh * 16 / 9)));
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+}
+/* phones portrait (≤767px wide) OR phones landscape (≤767px tall) → fill screen */
+@media (max-width: 767px), (max-height: 767px) and (orientation: landscape) {
+  .totem-canvas {
+    width: 100vw;
+    height: 100dvh;
+    aspect-ratio: unset;
+  }
 }

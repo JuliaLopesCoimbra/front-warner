@@ -70,20 +70,6 @@ export function RankingView() {
     >
       <div className="relative mx-auto flex h-full max-w-4xl flex-col px-[clamp(16px,3vw,48px)]" style={{ paddingTop: "clamp(48px,6vh,72px)", paddingBottom: "clamp(12px,2vh,28px)" }}>
 
-        {/* Navegação */}
-        <Link
-          href="/historico"
-          className="fixed left-[clamp(12px,2vw,28px)] top-[clamp(10px,1.5vh,20px)] z-20 rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-[clamp(11px,1.3vw,16px)] font-semibold text-neutral-600 hover:border-neutral-500 hover:text-neutral-900"
-        >
-          Histórico
-        </Link>
-        <Link
-          href="/sorteio"
-          className="fixed right-[clamp(12px,2vw,28px)] top-[clamp(10px,1.5vh,20px)] z-20 rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-[clamp(11px,1.3vw,16px)] font-semibold text-neutral-600 hover:border-neutral-900"
-        >
-          Sorteio
-        </Link>
-
         {/* Cabeçalho */}
         <div className="shrink-0">
           <p className="text-center text-[clamp(11px,1.6vh,26px)] font-bold uppercase tracking-[0.22em] text-neutral-900">

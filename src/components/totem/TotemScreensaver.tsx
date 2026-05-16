@@ -77,7 +77,7 @@ export function TotemScreensaver({ children }: { children: React.ReactNode }) {
           {screenType === "descanso" ? (
             <div
               className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: "url('/descanso.JPEG')" }}
+              style={{ backgroundImage: "url('/descanso.png')" }}
             />
           ) : (
             <>

@@ -18,20 +18,26 @@ export function FichasScreen() {
   const inc = useCallback(() => setQty((q) => Math.min(MAX, q + 1)), []);
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col px-[5%] pb-[6%] pt-[7%]">
-      <p className={`text-center text-neutral-900 ${totemText.kicker} tracking-[0.2em]`}>
-        01 · Fichas
-      </p>
+    <div className="flex h-full min-h-0 w-full flex-col landscape:flex-row">
+      {/* LEFT: header + description */}
+      <div className="flex flex-col items-center justify-center px-[6%] py-[6%] landscape:w-[42%]">
+        <p className={`text-center text-neutral-900 ${totemText.kicker} tracking-[0.2em]`}>
+          01 · Fichas
+        </p>
+        <h1 className={`mt-[4%] text-center tracking-tight text-neutral-900 ${totemText.title} leading-[1.15]`}>
+          Quantas fichas você entregou?
+        </h1>
+        <p className={`mt-[3%] text-center text-neutral-700 ${totemText.lead}`}>
+          Esse número define quantas perguntas você vai responder no quiz.
+        </p>
+      </div>
 
-      <h1 className={`mt-[4%] text-center tracking-tight text-neutral-900 ${totemText.title} leading-[1.15]`}>
-        Quantas fichas você entregou?
-      </h1>
-      <p className={`mx-auto mt-[3%] max-w-[90%] text-center text-neutral-500 ${totemText.lead}`}>
-        Esse número define quantas perguntas você vai responder no quiz.
-      </p>
+      {/* divider — totem only */}
+      <div className="hidden landscape:block landscape:w-px landscape:self-stretch landscape:bg-neutral-200" />
 
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-[5%] py-[4%]">
-        <p className={`text-center text-neutral-400 ${totemText.caption} tracking-[0.18em]`}>
+      {/* RIGHT: qty picker + action buttons */}
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-[3%] px-[6%] py-[4%]">
+        <p className={`text-center text-neutral-600 ${totemText.caption} tracking-[0.18em]`}>
           Quantidade
         </p>
         <p
@@ -41,7 +47,7 @@ export function FichasScreen() {
           {qty}
         </p>
 
-        <div className="flex w-full max-w-[92%] gap-[4%]">
+        <div className="flex w-full gap-[4%]">
           <button
             type="button"
             onClick={dec}
@@ -59,25 +65,25 @@ export function FichasScreen() {
             +
           </button>
         </div>
-      </div>
 
-      <div className="flex w-full flex-col gap-4">
-        <button
-          type="button"
-          onClick={() => {
-            writeTotemQuizQuestionCount(qty);
-            router.push("/totem/name");
-          }}
-          className={`bg-neutral-900 text-white transition-colors active:bg-neutral-700 ${totemTouch.btnPrimary} tracking-[0.12em]`}
-        >
-          Continuar →
-        </button>
-        <Link
-          href="/"
-          className={`bg-transparent text-neutral-600 transition-colors active:bg-neutral-100 ${totemTouch.btnGhost}`}
-        >
-          ← Voltar
-        </Link>
+        <div className="flex w-full flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              writeTotemQuizQuestionCount(qty);
+              router.push("/totem/name");
+            }}
+            className={`bg-neutral-900 text-white transition-colors active:bg-neutral-700 ${totemTouch.btnPrimary} tracking-[0.12em]`}
+          >
+            Continuar →
+          </button>
+          <Link
+            href="/"
+            className={`bg-transparent text-neutral-600 transition-colors active:bg-neutral-100 ${totemTouch.btnGhost}`}
+          >
+            ← Voltar
+          </Link>
+        </div>
       </div>
     </div>
   );

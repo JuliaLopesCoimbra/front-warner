@@ -69,7 +69,6 @@ export function CadastroScreen() {
     }
   }, [nickname, router]);
 
-  // Teclado físico — ignora quando o foco está num <input> nativo (mobile)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (loading) return;
@@ -86,72 +85,79 @@ export function CadastroScreen() {
   }, [loading, appendNick, backNick, enviar]);
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col px-[4%] pb-[3%] pt-[4%]">
-      <p className={`text-center text-neutral-900 ${totemText.kicker}`}>
-        03 · Cadastro
-      </p>
-      <h1 className={`mt-[2%] text-center text-neutral-900 ${totemText.title}`}>
-        Complete seu cadastro
-      </h1>
-
-      {/* Display do nome — visível no totem */}
-      <div className="mt-[2.5%] shrink-0 hidden md:block">
-        <div className="rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 py-5 sm:px-6 sm:py-6">
-          <p className={`text-neutral-400 ${totemText.caption}`}>Nome completo</p>
-          <p className="mt-1 truncate text-[clamp(22px,4.6vmin,44px)] font-bold text-neutral-900">
-            {nickname || <span className="text-neutral-300">—</span>}
+    <div className="flex h-full min-h-0 w-full flex-col landscape:flex-row">
+      {/* LEFT: header + display + error + buttons */}
+      <div className="flex flex-col justify-between px-[4%] pb-[3%] pt-[4%] landscape:w-[55%]">
+        <div>
+          <p className={`text-center text-neutral-900 ${totemText.kicker}`}>
+            03 · Cadastro
           </p>
+          <h1 className={`mt-[2%] text-center text-neutral-900 ${totemText.title}`}>
+            Complete seu cadastro
+          </h1>
+
+          {/* Display — totem only */}
+          <div className="mt-[2.5%] shrink-0 hidden landscape:block">
+            <div className="rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 py-5 sm:px-6 sm:py-6">
+              <p className={`text-neutral-400 ${totemText.caption}`}>Nome completo</p>
+              <p className="mt-1 truncate text-[clamp(22px,4.6vmin,44px)] font-bold text-neutral-900">
+                {nickname || <span className="text-neutral-300">—</span>}
+              </p>
+            </div>
+          </div>
+
+          {/* Input nativo — mobile only */}
+          <div className="mt-[3%] shrink-0 landscape:hidden">
+            <input
+              type="text"
+              value={nickname}
+              onChange={(e) => {
+                setError(null);
+                setNickname(e.target.value.slice(0, 60));
+              }}
+              onKeyDown={(e) => { if (e.key === "Enter") void enviar(); }}
+              placeholder="Digite seu nome completo"
+              autoComplete="off"
+              className="w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 py-4 text-[clamp(18px,4vmin,32px)] font-bold text-neutral-900 outline-none placeholder:text-neutral-300 focus:border-neutral-700"
+            />
+          </div>
+
+          {error ? (
+            <p className={`mx-auto mt-2 max-h-[14vh] overflow-y-auto px-1 text-center text-red-600 ${totemText.error}`}>
+              {error}
+            </p>
+          ) : (
+            <div className="min-h-[1rem]" />
+          )}
+        </div>
+
+        <div className="mt-2 flex shrink-0 flex-col gap-3">
+          <button
+            type="button"
+            disabled={loading || nickname.trim().length < 2}
+            onClick={enviar}
+            className={`bg-neutral-900 text-white disabled:opacity-50 ${totemTouch.btnPrimary}`}
+          >
+            {loading ? "Enviando…" : "Começar o quiz →"}
+          </button>
+          <Link
+            href="/totem/name"
+            className={`text-neutral-600 active:bg-neutral-100 ${totemTouch.btnGhost}`}
+          >
+            ← Voltar
+          </Link>
         </div>
       </div>
 
-      {/* Input nativo — apenas em mobile */}
-      <div className="mt-[3%] shrink-0 md:hidden">
-        <input
-          type="text"
-          value={nickname}
-          onChange={(e) => {
-            setError(null);
-            setNickname(e.target.value.slice(0, 60));
-          }}
-          onKeyDown={(e) => { if (e.key === "Enter") void enviar(); }}
-          placeholder="Digite seu nome completo"
-          autoComplete="off"
-          className="w-full rounded-2xl border-2 border-neutral-900 bg-neutral-100 px-5 py-4 text-[clamp(18px,4vmin,32px)] font-bold text-neutral-900 outline-none placeholder:text-neutral-300 focus:border-neutral-700"
-        />
-      </div>
-
-      {error ? (
-        <p className={`mx-auto mt-2 max-h-[14vh] overflow-y-auto px-1 text-center text-red-600 ${totemText.error}`}>
-          {error}
-        </p>
-      ) : (
-        <div className="min-h-[1rem]" />
-      )}
-
-      {/* Teclado virtual — apenas no totem (md+) */}
-      <div className="mt-2 hidden min-h-0 flex-1 overflow-hidden md:block">
-        <OnScreenAlphaPad
-          onKey={(ch) => appendNick(ch)}
-          onBackspace={backNick}
-          onSpace={() => appendNick(" ")}
-        />
-      </div>
-
-      <div className="mt-2 flex shrink-0 flex-col gap-3">
-        <button
-          type="button"
-          disabled={loading || nickname.trim().length < 2}
-          onClick={enviar}
-          className={`bg-neutral-900 text-white disabled:opacity-50 ${totemTouch.btnPrimary}`}
-        >
-          {loading ? "Enviando…" : "Começar o quiz →"}
-        </button>
-        <Link
-          href="/totem/name"
-          className={`text-neutral-600 active:bg-neutral-100 ${totemTouch.btnGhost}`}
-        >
-          ← Voltar
-        </Link>
+      {/* RIGHT: keyboard — totem only */}
+      <div className="hidden landscape:flex landscape:w-[45%] landscape:flex-col landscape:items-stretch landscape:px-[4%] landscape:pb-[4%] landscape:pt-[4%]">
+        <div className="min-h-0 flex-1">
+          <OnScreenAlphaPad
+            onKey={(ch) => appendNick(ch)}
+            onBackspace={backNick}
+            onSpace={() => appendNick(" ")}
+          />
+        </div>
       </div>
     </div>
   );

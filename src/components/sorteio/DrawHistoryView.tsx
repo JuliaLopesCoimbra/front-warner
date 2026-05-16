@@ -72,6 +72,7 @@ export function DrawHistoryView() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
+    <div className="min-h-screen bg-cover bg-center bg-fixed" style={{ backgroundImage: "url('/fundo.JPEG')" }}>
     <div className="mx-auto flex min-h-screen max-w-4xl flex-col px-[clamp(16px,4vw,56px)] py-[clamp(24px,5vw,72px)] pb-24">
       <Link
         href="/ranking"
@@ -168,6 +169,7 @@ export function DrawHistoryView() {
           </div>
         </div>
       ) : null}
+    </div>
     </div>
   );
 }

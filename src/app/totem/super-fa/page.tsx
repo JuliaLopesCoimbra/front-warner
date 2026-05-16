@@ -4,7 +4,7 @@ import { TotemStage } from "@/components/totem/TotemCanvas";
 export default function SuperFaPage() {
   return (
     <TotemStage>
-      <SuperFaScreen />
+      <SuperFaScreen enableQuestionTimer={false} />
     </TotemStage>
   );
 }
