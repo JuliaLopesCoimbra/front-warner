@@ -20,52 +20,65 @@ type QuestionPayload = {
 type Outcome = "idle" | "correct" | "wrong";
 
 export function QuizQuestionScreen() {
-  const [q, setQ] = useState<QuestionPayload | null>(null);
+  const [questions, setQuestions] = useState<QuestionPayload[]>([]);
+  const [questionIndex, setQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<Outcome>("idle");
   const [picked, setPicked] = useState<"A" | "B" | "C" | "D" | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [totalRounds, setTotalRounds] = useState(1);
-  const [questionNumber, setQuestionNumber] = useState(1);
 
-  const load = useCallback(async () => {
+  const q = questions[questionIndex] ?? null;
+  const questionNumber = questionIndex + 1;
+
+  const loadSession = useCallback(async (count: number) => {
     setLoading(true);
     setError(null);
     setOutcome("idle");
     setPicked(null);
+    setQuestionIndex(0);
+    setQuestions([]);
     try {
-      const res = await fetch(`${getApiBaseUrl()}/questions/random`, {
-        cache: "no-store",
-      });
-      const data = (await res.json()) as QuestionPayload & { detail?: string };
+      const res = await fetch(
+        `${getApiBaseUrl()}/questions/session?count=${count}`,
+        { cache: "no-store" },
+      );
+      const data = (await res.json()) as
+        | QuestionPayload[]
+        | { detail?: string };
       if (!res.ok) {
+        const detail = (data as { detail?: string }).detail;
         setError(
-          typeof data.detail === "string"
-            ? data.detail
-            : "Não foi possível carregar a pergunta."
+          typeof detail === "string"
+            ? detail
+            : "Não foi possível carregar as perguntas.",
         );
-        setQ(null);
         return;
       }
-      if (!data.options || data.options.length !== 4 || !data.layout_token) {
-        setError("Formato de pergunta inválido na API.");
-        setQ(null);
+      const list = data as QuestionPayload[];
+      if (
+        !Array.isArray(list) ||
+        list.length === 0 ||
+        !list[0].options ||
+        list[0].options.length !== 4
+      ) {
+        setError("Formato de perguntas inválido na API.");
         return;
       }
-      setQ(data);
+      setQuestions(list);
     } catch {
       setError("Sem conexão com a API.");
-      setQ(null);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    setTotalRounds(readTotemQuizQuestionCount());
-    void load();
-  }, [load]);
+    const count = readTotemQuizQuestionCount();
+    setTotalRounds(count);
+    void loadSession(count);
+  }, [loadSession]);
 
   const enviar = useCallback(async () => {
     if (!q || !picked || outcome !== "idle" || submitting) return;
@@ -86,7 +99,7 @@ export function QuizQuestionScreen() {
         setError(
           typeof data.detail === "string"
             ? data.detail
-            : "Não foi possível validar a resposta."
+            : "Não foi possível validar a resposta.",
         );
         return;
       }
@@ -99,6 +112,13 @@ export function QuizQuestionScreen() {
     }
   }, [q, picked, outcome, submitting]);
 
+  const nextQuestion = useCallback(() => {
+    setOutcome("idle");
+    setPicked(null);
+    setError(null);
+    setQuestionIndex((i) => i + 1);
+  }, []);
+
   const answered = outcome !== "idle";
   const hasMoreAfterThis = answered && questionNumber < totalRounds;
 
@@ -109,8 +129,7 @@ export function QuizQuestionScreen() {
         return `${base} !border-emerald-500 !bg-emerald-50`;
       return `${base} opacity-40`;
     }
-    if (letter === picked)
-      return `${base} !border-neutral-900 !bg-neutral-100`;
+    if (letter === picked) return `${base} !border-neutral-900 !bg-neutral-100`;
     return `${base} active:border-neutral-400 enabled:active:bg-neutral-100`;
   };
 
@@ -119,29 +138,35 @@ export function QuizQuestionScreen() {
       <p className={`text-center text-neutral-900 ${totemText.kicker}`}>
         04 · Quiz
       </p>
-      <p className={`text-neutral-900 ${totemText.caption}`} aria-live="polite">
+      <p
+        className={`text-neutral-900 ${totemText.caption}`}
+        aria-live="polite"
+      >
         Pergunta {questionNumber}/{totalRounds}
       </p>
     </div>
   );
 
-  /* Loading / error-without-question: full-width centered */
   if (loading || (error && !q)) {
     return (
       <div className="flex h-full min-h-0 w-full flex-col items-center justify-center px-[4%] pb-[4%] pt-[4%]">
         {header}
         {loading ? (
-          <p className={`mt-[8%] text-center text-neutral-400 ${totemText.loading}`}>
+          <p
+            className={`mt-[8%] text-center text-neutral-400 ${totemText.loading}`}
+          >
             Carregando pergunta…
           </p>
         ) : (
           <div className="mt-[6%] flex flex-col items-center gap-8">
-            <p className={`max-w-[95%] text-center text-red-600 ${totemText.error}`}>
+            <p
+              className={`max-w-[95%] text-center text-red-600 ${totemText.error}`}
+            >
               {error}
             </p>
             <button
               type="button"
-              onClick={() => void load()}
+              onClick={() => void loadSession(totalRounds)}
               className={`bg-neutral-900 text-white ${totemTouch.btnRetry}`}
             >
               Tentar de novo
@@ -161,17 +186,18 @@ export function QuizQuestionScreen() {
         {header}
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
           <div className={`w-full ${totemTouch.promptBox}`}>
-            <p className={`text-neutral-900 ${totemText.prompt}`}>
-              {q.prompt}
-            </p>
+            <p className={`text-neutral-900 ${totemText.prompt}`}>{q.prompt}</p>
           </div>
-          {/* hint antes de responder; resultado depois — mesmo espaço, sem mover as opções */}
           {outcome === "correct" ? (
-            <p className={`mt-3 text-center text-emerald-600 ${totemText.outcome}`}>
+            <p
+              className={`mt-3 text-center text-emerald-600 ${totemText.outcome}`}
+            >
               Você acertou!
             </p>
           ) : outcome === "wrong" ? (
-            <p className={`mt-3 text-center text-red-600 ${totemText.outcome}`}>
+            <p
+              className={`mt-3 text-center text-red-600 ${totemText.outcome}`}
+            >
               Você errou
             </p>
           ) : (
@@ -196,13 +222,15 @@ export function QuizQuestionScreen() {
               onClick={() => setPicked(o.letter)}
               className={optionStyle(o.letter)}
             >
-              <span className={`${totemTouch.optionBadge} ${
-                picked === o.letter && !answered
-                  ? "bg-neutral-900 text-white"
-                  : answered && outcome === "correct" && picked === o.letter
-                    ? "bg-emerald-500 text-white"
-                    : "bg-neutral-200 text-neutral-900"
-              } ${totemText.optionLetter}`}>
+              <span
+                className={`${totemTouch.optionBadge} ${
+                  picked === o.letter && !answered
+                    ? "bg-neutral-900 text-white"
+                    : answered && outcome === "correct" && picked === o.letter
+                      ? "bg-emerald-500 text-white"
+                      : "bg-neutral-200 text-neutral-900"
+                } ${totemText.optionLetter}`}
+              >
                 {o.letter}
               </span>
               <span className={`text-neutral-800 ${totemText.optionText}`}>
@@ -232,11 +260,10 @@ export function QuizQuestionScreen() {
           {hasMoreAfterThis ? (
             <button
               type="button"
-              disabled={loading}
-              onClick={() => { setQuestionNumber((n) => n + 1); void load(); }}
-              className={`bg-neutral-900 text-white disabled:opacity-50 ${totemTouch.btnPrimary}`}
+              onClick={nextQuestion}
+              className={`bg-neutral-900 text-white ${totemTouch.btnPrimary}`}
             >
-              {loading ? "Carregando…" : "Próxima pergunta →"}
+              Próxima pergunta →
             </button>
           ) : null}
           {answered && !hasMoreAfterThis ? (
